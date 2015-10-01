@@ -28,8 +28,19 @@ entry:
 	mov si, msg_Load
 	call print_string_16
 
+	mov bx, 0x7DBE		; First partition table entry address
+	mov cx, 4			; There are four partition entries
+find_bmfs_partition:
+	cmp byte [bx+4], 0xC2	; Compare partition type against 0xC2
+	je bmfs_partition_found	; This one is unused according to http://www.win.tue.nl/~aeb/partitions/partition_types-1.html
+	add bx,0x10				; So we will use it for BMFS
+	dec cx
+	je magic_fail			; If we haven't found the partition among the four primary ones, we report fail
+	jmp find_bmfs_partition
+
+bmfs_partition_found:
 	mov eax, 64			; Number of sectors to load. 64 sectors = 32768 bytes
-	mov ebx, 16			; Start immediately after directory (offset 8192)
+	mov ebx, dword [bx+8]	; First sector of the BMFS partition
 	mov cx, 0x8000			; Pure64 expects to be loaded at 0x8000
 
 load_nextsector:
