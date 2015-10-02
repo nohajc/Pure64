@@ -41,6 +41,7 @@ find_bmfs_partition:
 bmfs_partition_found:
 	mov eax, 64			; Number of sectors to load. 64 sectors = 32768 bytes
 	mov ebx, dword [bx+8]	; First sector of the BMFS partition
+	add ebx, 16				; Loader and kernel is located 8192 bytes after the partition start
 	mov cx, 0x8000			; Pure64 expects to be loaded at 0x8000
 
 load_nextsector:
